@@ -8,7 +8,7 @@
  * @package WebberZone\Contextual_Related_Posts\Admin
  */
 
-namespace WebberZone\Contextual_Related_Posts\Admin\Settings;
+namespace WebberZone\Contextual_Related_Posts\Admin;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -22,87 +22,14 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class Settings {
 
-
 	/**
-	 * Admin Dashboard.
+	 * Settings API instance.
 	 *
 	 * @since 3.5.0
 	 *
-	 * @var object Admin Dashboard.
+	 * @var Settings\Settings_API
 	 */
-	public $admin_dashboard;
-
-	/**
-	 * Settings API.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Settings API.
-	 */
-	public $settings_api;
-
-	/**
-	 * Statistics table.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Statistics table.
-	 */
-	public $statistics;
-
-	/**
-	 * Activator class.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Activator class.
-	 */
-	public $activator;
-
-	/**
-	 * Admin Columns.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Admin Columns.
-	 */
-	public $admin_columns;
-
-	/**
-	 * Metabox functions.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Metabox functions.
-	 */
-	public $metabox;
-
-	/**
-	 * Import Export functions.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Import Export functions.
-	 */
-	public $import_export;
-
-	/**
-	 * Tools page.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var object Tools page.
-	 */
-	public $tools_page;
-
-	/**
-	 * Settings Page in Admin area.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @var string Settings Page.
-	 */
-	public $settings_page;
+	public Settings\Settings_API $settings_api;
 
 	/**
 	 * Prefix which is used for creating the unique filters and actions.
@@ -111,7 +38,7 @@ class Settings {
 	 *
 	 * @var string Prefix.
 	 */
-	public static $prefix;
+	public static string $prefix = 'crp';
 
 	/**
 	 * Settings Key.
@@ -120,7 +47,7 @@ class Settings {
 	 *
 	 * @var string Settings Key.
 	 */
-	public $settings_key;
+	public string $settings_key = 'crp_settings';
 
 	/**
 	 * The slug name to refer to this menu by (should be unique for this menu).
@@ -129,7 +56,7 @@ class Settings {
 	 *
 	 * @var string Menu slug.
 	 */
-	public $menu_slug;
+	public string $menu_slug = 'crp_options_page';
 
 	/**
 	 * Main constructor class.
@@ -137,10 +64,6 @@ class Settings {
 	 * @since 3.5.0
 	 */
 	public function __construct() {
-		$this->settings_key = 'crp_settings';
-		self::$prefix       = 'crp';
-		$this->menu_slug    = 'crp_options_page';
-
 		add_action( 'admin_menu', array( $this, 'initialise_settings' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 11, 2 );
 		add_filter( 'plugin_action_links_' . plugin_basename( CRP_PLUGIN_FILE ), array( $this, 'plugin_actions_links' ) );
@@ -177,7 +100,7 @@ class Settings {
 			'upgraded_settings'   => array(),
 		);
 
-		$this->settings_api = new Settings_API( $this->settings_key, self::$prefix, $args );
+		$this->settings_api = new Settings\Settings_API( $this->settings_key, self::$prefix, $args );
 	}
 
 	/**
@@ -237,12 +160,13 @@ class Settings {
 	 */
 	public static function get_settings_sections() {
 		$settings_sections = array(
-			'general'   => __( 'General', 'contextual-related-posts' ),
-			'list'      => __( 'List tuning', 'contextual-related-posts' ),
-			'output'    => __( 'Output', 'contextual-related-posts' ),
-			'thumbnail' => __( 'Thumbnail', 'contextual-related-posts' ),
-			'styles'    => __( 'Styles', 'contextual-related-posts' ),
-			'feed'      => __( 'Feed', 'contextual-related-posts' ),
+			'general'     => __( 'General', 'contextual-related-posts' ),
+			'performance' => __( 'Performance', 'contextual-related-posts' ),
+			'list'        => __( 'List tuning', 'contextual-related-posts' ),
+			'output'      => __( 'Output', 'contextual-related-posts' ),
+			'thumbnail'   => __( 'Thumbnail', 'contextual-related-posts' ),
+			'styles'      => __( 'Styles', 'contextual-related-posts' ),
+			'feed'        => __( 'Feed', 'contextual-related-posts' ),
 		);
 
 		/**
@@ -254,7 +178,6 @@ class Settings {
 		 */
 		return apply_filters( self::$prefix . '_settings_sections', $settings_sections );
 	}
-
 
 	/**
 	 * Retrieve the array of plugin settings
@@ -293,19 +216,11 @@ class Settings {
 	 */
 	public static function settings_general() {
 		$settings = array(
-			'cache_posts'                  => array(
-				'id'      => 'cache_posts',
-				'name'    => esc_html__( 'Cache posts only', 'contextual-related-posts' ),
-				'desc'    => esc_html__( 'Enabling this will only cache the related posts but not the entire HTML output. This gives you more flexibility at marginally lower performance. Use this if you only have the related posts called with the same set of parameters.', 'contextual-related-posts' ),
-				'type'    => 'checkbox',
-				'options' => true,
-			),
-			'cache'                        => array(
-				'id'      => 'cache',
-				'name'    => esc_html__( 'Cache HTML output', 'contextual-related-posts' ),
-				'desc'    => esc_html__( 'Enabling this will cache the entire HTML generated when the post is visited the first time. The cache is cleaned when you save this page. Highly recommended particularly on busy sites. Default is true.', 'contextual-related-posts' ),
-				'type'    => 'checkbox',
-				'options' => true,
+			'list_general_header'          => array(
+				'id'   => 'list_general_header',
+				'name' => '<h3>' . esc_html__( 'General settings', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'General settings for the related posts', 'contextual-related-posts' ),
+				'type' => 'header',
 			),
 			'add_to'                       => array(
 				'id'      => 'add_to',
@@ -356,6 +271,12 @@ class Settings {
 				'type'    => 'checkbox',
 				'options' => false,
 			),
+			'uninstall_settings_header'    => array(
+				'id'   => 'uninstall_settings_header',
+				'name' => '<h3>' . esc_html__( 'Uninstall settings', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for uninstalling the plugin', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
 			'uninstall_options'            => array(
 				'id'      => 'uninstall_options',
 				'name'    => esc_html__( 'Delete options on uninstall', 'contextual-related-posts' ),
@@ -370,12 +291,25 @@ class Settings {
 				'type'    => 'checkbox',
 				'options' => true,
 			),
+			'uninstall_tables'             => array(
+				'id'      => 'uninstall_tables',
+				'name'    => esc_html__( 'Delete custom tables on uninstall', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'If this is checked, custom tables created by Contextual Related Posts Pro will be deleted when you uninstall/delete the plugin.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => true,
+			),
 			'uninstall_indices_deactivate' => array(
 				'id'      => 'uninstall_indices_deactivate',
 				'name'    => esc_html__( 'Delete FULLTEXT indices on deactivate', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If this is checked, FULLTEXT indices generated by Contextual Related Posts are removed from the database if you choose to deactivate the plugin.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
+			),
+			'misc_general_header'          => array(
+				'id'   => 'misc_general_header',
+				'name' => '<h3>' . esc_html__( 'Miscellaneous', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Miscellaneous settings', 'contextual-related-posts' ),
+				'type' => 'header',
 			),
 			'show_metabox'                 => array(
 				'id'      => 'show_metabox',
@@ -409,7 +343,6 @@ class Settings {
 		 */
 		return apply_filters( self::$prefix . '_settings_general', $settings );
 	}
-
 
 	/**
 	 * Retrieve the array of Output settings
@@ -507,6 +440,14 @@ class Settings {
 				'type'    => 'checkbox',
 				'options' => false,
 			),
+			'track_pixels'          => array(
+				'id'      => 'track_pixels',
+				'name'    => esc_html__( 'Add tracking parameters to URLs', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Adds tracking parameters to the URLs so you can track when they are clicked in Google Analytics.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => false,
+				'pro'     => true,
+			),
 			'exclude_output_header' => array(
 				'id'   => 'exclude_output_header',
 				'name' => '<h3>' . esc_html__( 'Exclusion settings', 'contextual-related-posts' ) . '</h3>',
@@ -582,7 +523,6 @@ class Settings {
 		return apply_filters( self::$prefix . '_settings_output', $settings );
 	}
 
-
 	/**
 	 * Retrieve the array of List Tuning settings
 	 *
@@ -592,7 +532,13 @@ class Settings {
 	 */
 	public static function settings_list() {
 		$settings = array(
-			'use_global_settings'    => array(
+			'list_general_header'       => array(
+				'id'   => 'list_general_header',
+				'name' => '<h3>' . esc_html__( 'General List Settings', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'General settings for the related posts list', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'use_global_settings'       => array(
 				'id'      => 'use_global_settings',
 				'name'    => esc_html__( 'Use global settings in block', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If activated, the settings from this page are automatically inserted in the Related Posts block. This also applies to existing blocks which do not have any attributes set if the post is edited.', 'contextual-related-posts' ),
@@ -600,7 +546,7 @@ class Settings {
 				'options' => false,
 				'pro'     => true,
 			),
-			'limit'                  => array(
+			'limit'                     => array(
 				'id'      => 'limit',
 				'name'    => esc_html__( 'Number of posts to display', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Maximum number of posts that will be displayed in the list. This option is used if you do not specify the number of posts in the widget or shortcodes', 'contextual-related-posts' ),
@@ -609,7 +555,7 @@ class Settings {
 				'min'     => '0',
 				'size'    => 'small',
 			),
-			'daily_range'            => array(
+			'daily_range'               => array(
 				'id'      => 'daily_range',
 				'name'    => esc_html__( 'Related posts should be newer than', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'This sets the cut-off period for which posts will be displayed. e.g. setting it to 365 will show related posts from the last year only. Set to 0 to disable limiting posts by date.', 'contextual-related-posts' ),
@@ -617,7 +563,7 @@ class Settings {
 				'options' => '0',
 				'min'     => '0',
 			),
-			'ordering'               => array(
+			'ordering'                  => array(
 				'id'      => 'ordering',
 				'name'    => esc_html__( 'Order posts', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Select how you want the related posts to be ordered. Randomly will shuffle the related posts and does not work if you have HTML caching enabled.', 'contextual-related-posts' ),
@@ -625,14 +571,20 @@ class Settings {
 				'default' => 'relevance',
 				'options' => self::get_orderings(),
 			),
-			'random_order'           => array(
+			'random_order'              => array(
 				'id'      => 'random_order',
 				'name'    => esc_html__( 'Randomize posts', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'This shuffles the selected related posts, similar to choosing Randomly in the above option. If you select to order by date in the previous option, then the related posts will first be sorted by date and the selected ones are shuffled. Does not work if Cache HTML output is enabled.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'weight_title'           => array(
+			'relevance_header'          => array(
+				'id'   => 'relevance_header',
+				'name' => '<h3>' . esc_html__( 'Relevance Matching', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for content matching and relevance scoring', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'weight_title'              => array(
 				'id'      => 'weight_title',
 				'name'    => __( 'Weight for post title', 'contextual-related-posts' ),
 				'desc'    => __( 'The weight to give to the post title when calculating the relevance of the post.', 'contextual-related-posts' ),
@@ -642,34 +594,82 @@ class Settings {
 				'size'    => 'small',
 				'pro'     => true,
 			),
-			'weight_content'         => array(
+			'weight_content'            => array(
 				'id'      => 'weight_content',
 				'name'    => __( 'Weight for post content', 'contextual-related-posts' ),
-				'desc'    => __( 'The weight to give to the post content when calculating the relevance of the post.', 'contextual-related-posts' ),
+				'desc'    => __( 'The weight to give to the post content when calculating the relevance of the post. This may make your query take longer to process.', 'contextual-related-posts' ),
 				'type'    => 'number',
-				'options' => 1,
+				'options' => 0,
 				'min'     => '0',
 				'size'    => 'small',
 				'pro'     => true,
 			),
-			'weight_excerpt'         => array(
+			'weight_excerpt'            => array(
 				'id'      => 'weight_excerpt',
 				'name'    => __( 'Weight for post excerpt', 'contextual-related-posts' ),
 				'desc'    => __( 'The weight to give to the post excerpt when calculating the relevance of the post.', 'contextual-related-posts' ),
 				'type'    => 'number',
-				'options' => 1,
+				'options' => 0,
 				'min'     => '0',
 				'size'    => 'small',
 				'pro'     => true,
 			),
-			'match_content'          => array(
+			'weight_taxonomy_category'  => array(
+				'id'      => 'weight_taxonomy_category',
+				'name'    => __( 'Weight for categories', 'contextual-related-posts' ),
+				'desc'    => __( 'Weight to give category matches when calculating relevance.', 'contextual-related-posts' ),
+				'type'    => 'number',
+				'options' => 0,
+				'min'     => '0',
+				'size'    => 'small',
+				'pro'     => true,
+			),
+			'weight_taxonomy_post_tag'  => array(
+				'id'      => 'weight_taxonomy_post_tag',
+				'name'    => __( 'Weight for tags', 'contextual-related-posts' ),
+				'desc'    => __( 'Weight to give tag matches when calculating relevance.', 'contextual-related-posts' ),
+				'type'    => 'number',
+				'options' => 0,
+				'min'     => '0',
+				'size'    => 'small',
+				'pro'     => true,
+			),
+			'weight_taxonomy_default'   => array(
+				'id'      => 'weight_taxonomy_default',
+				'name'    => __( 'Default taxonomy weight', 'contextual-related-posts' ),
+				'desc'    => __( 'Weight to give other taxonomy matches when calculating relevance.', 'contextual-related-posts' ),
+				'type'    => 'number',
+				'options' => 0,
+				'min'     => '0',
+				'size'    => 'small',
+				'pro'     => true,
+			),
+			'weight_primary_term_boost' => array(
+				'id'      => 'weight_primary_term_boost',
+				'name'    => __( 'Primary term boost', 'contextual-related-posts' ),
+				'desc'    => __( 'Additional weight multiplier for primary terms.', 'contextual-related-posts' ),
+				'type'    => 'number',
+				'options' => 0,
+				'min'     => '0',
+				'size'    => 'small',
+				'pro'     => true,
+			),
+			'use_precomputed_tax_score' => array(
+				'id'      => 'use_precomputed_tax_score',
+				'name'    => __( 'Use precomputed taxonomy score', 'contextual-related-posts' ),
+				'desc'    => __( 'Enable to use precomputed taxonomy score for relevance calculation. This can improve performance but will ignore the above weights for taxonomies when running live queries.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => false,
+				'pro'     => true,
+			),
+			'match_content'             => array(
 				'id'      => 'match_content',
 				'name'    => esc_html__( 'Related posts based on title and content', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If unchecked, only posts titles are used. Enable the cache if enabling this option for better performance. Each site is different, so toggle this option to see which setting gives you better quality related posts.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => true,
 			),
-			'match_content_words'    => array(
+			'match_content_words'       => array(
 				'id'      => 'match_content_words',
 				'name'    => esc_html__( 'Limit content to be compared', 'contextual-related-posts' ),
 				/* translators: 1: Number. */
@@ -679,49 +679,69 @@ class Settings {
 				'min'     => '0',
 				'max'     => CRP_MAX_WORDS,
 			),
-			'post_types'             => array(
+			'post_filter_header'        => array(
+				'id'   => 'post_filter_header',
+				'name' => '<h3>' . esc_html__( 'Post Selection Criteria', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for controlling which posts to include', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'post_types'                => array(
 				'id'      => 'post_types',
 				'name'    => esc_html__( 'Post types to include', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types you want to include in the list of posts. This field can be overridden using a comma separated list of post types when using the manual display.', 'contextual-related-posts' ),
 				'type'    => 'posttypes',
 				'options' => 'post,page',
 			),
-			'same_post_type'         => array(
+			'cornerstone_post_ids'      => array(
+				'id'      => 'cornerstone_post_ids',
+				'name'    => esc_html__( 'Cornerstone IDs', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Comma separated list of post/page or custom post type IDs to be used as cornerstone posts. Posts with these IDs will be randomly selected and then included in the list of related posts. Roughly 20% of the related posts will be selected from this list.', 'contextual-related-posts' ),
+				'type'    => 'numbercsv',
+				'options' => '',
+				'pro'     => true,
+			),
+			'same_post_type'            => array(
 				'id'      => 'same_post_type',
 				'name'    => esc_html__( 'Limit to same post type', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If checked, the related posts will only be selected from the same post type of the current post.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'same_author'            => array(
+			'same_author'               => array(
 				'id'      => 'same_author',
 				'name'    => esc_html__( 'Limit to same author', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If checked, the related posts will only be selected from the same author of the current post.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'primary_term'           => array(
+			'taxonomy_header'           => array(
+				'id'   => 'taxonomy_header',
+				'name' => '<h3>' . esc_html__( 'Taxonomy & Term Filtering', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for controlling taxonomy and term relationships', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'primary_term'              => array(
 				'id'      => 'primary_term',
 				'name'    => esc_html__( 'Limit to same primary term', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If enabled, then it will only select posts from the primary category/term. This is usually set via your SEO plugin and will default to the first category/term returned by WordPress', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'same_taxes'             => array(
+			'same_taxes'                => array(
 				'id'      => 'same_taxes',
 				'name'    => esc_html__( 'Only from same', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Limit the related posts only to the categories, tags, and/or taxonomies of the current post.', 'contextual-related-posts' ),
 				'type'    => 'taxonomies',
 				'options' => '',
 			),
-			'match_all'              => array(
+			'match_all'                 => array(
 				'id'      => 'match_all',
 				'name'    => esc_html__( 'Match all taxonomies', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'If enabled, then it will only select posts that match all the above selected taxonomies. This can result in no related posts being found.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'no_of_common_terms'     => array(
+			'no_of_common_terms'        => array(
 				'id'      => 'no_of_common_terms',
 				'name'    => esc_html__( 'Number of common terms', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Enter the minimum number of common terms that have to be matched before a post is considered related.', 'contextual-related-posts' ),
@@ -729,7 +749,7 @@ class Settings {
 				'options' => '1',
 				'min'     => '1',
 			),
-			'related_meta_keys'      => array(
+			'related_meta_keys'         => array(
 				'id'      => 'related_meta_keys',
 				'name'    => esc_html__( 'Related Meta Keys', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Enter a comma-separated list of meta keys. Posts that match the same value of the meta key are displayed before the other related posts', 'contextual-related-posts' ),
@@ -737,14 +757,20 @@ class Settings {
 				'options' => '',
 				'size'    => 'large',
 			),
-			'exclude_post_ids'       => array(
+			'exclusion_header'          => array(
+				'id'   => 'exclusion_header',
+				'name' => '<h3>' . esc_html__( 'Exclusion Rules', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for excluding posts and terms', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'exclude_post_ids'          => array(
 				'id'      => 'exclude_post_ids',
 				'name'    => esc_html__( 'Post/page IDs to exclude', 'contextual-related-posts' ),
 				'desc'    => esc_html__( 'Comma-separated list of post or page IDs to exclude from the list. e.g. 188,320,500', 'contextual-related-posts' ),
 				'type'    => 'numbercsv',
 				'options' => '',
 			),
-			'exclude_cat_slugs'      => array(
+			'exclude_cat_slugs'         => array(
 				'id'          => 'exclude_cat_slugs',
 				'name'        => esc_html__( 'Exclude Terms', 'contextual-related-posts' ),
 				'desc'        => esc_html__( 'The field above has an autocomplete so simply start typing in the starting letters and it will prompt you with options. This field requires a specific format as displayed by the autocomplete.', 'contextual-related-posts' ),
@@ -753,7 +779,7 @@ class Settings {
 				'size'        => 'large',
 				'field_class' => 'category_autocomplete',
 			),
-			'exclude_categories'     => array(
+			'exclude_categories'        => array(
 				'id'       => 'exclude_categories',
 				'name'     => esc_html__( 'Exclude Term Taxonomy IDs', 'contextual-related-posts' ),
 				'desc'     => esc_html__( 'This is a readonly field that is automatically populated based on the above input when the settings are saved. These might differ from the IDs visible in the Categories page which use the term_id. Contextual Related Posts uses the term_taxonomy_id which is unique to this taxonomy.', 'contextual-related-posts' ),
@@ -761,19 +787,40 @@ class Settings {
 				'options'  => '',
 				'readonly' => true,
 			),
-			'disable_contextual'     => array(
+			'advanced_header'           => array(
+				'id'   => 'advanced_header',
+				'name' => '<h3>' . esc_html__( 'Advanced Options', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Advanced settings for contextual matching', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'disable_contextual'        => array(
 				'id'      => 'disable_contextual',
 				'name'    => esc_html__( 'Disable contextual matching', 'contextual-related-posts' ),
-				'desc'    => esc_html__( 'Selecting this option will turn off contextual matching. This is only useful if you activate the option: "Only from same" from the General tab. Otherwise, you will end up with the same set of related posts on all pages with no relevance.', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Select to disable contextual matching. This will disable the content matching described above. You can choose to fallback to just the first X posts from the selected categories mentioned below.', 'contextual-related-posts' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'disable_contextual_cpt' => array(
-				'id'      => 'disable_contextual_cpt',
-				'name'    => esc_html__( 'Disable contextual matching ONLY on attachments and custom post types', 'contextual-related-posts' ),
-				'desc'    => esc_html__( 'Applies only if the previous option is checked. Selecting this option will retain contextual matching for posts and pages but disable this on any custom post types.', 'contextual-related-posts' ),
-				'type'    => 'checkbox',
-				'options' => true,
+			'disable_contextual_cpt'    => array(
+				'id'          => 'disable_contextual_cpt',
+				'name'        => esc_html__( 'Disable contextual matching ONLY for custom post types', 'contextual-related-posts' ),
+				'desc'        => esc_html__( 'Checking this option will disable contextual matching only for custom post types. For WordPress inbuilt post types, the plugin will continue as per your settings above. If you enable this option, make sure that Manual related posts or Randomize posts are selected above for meaningful results.', 'contextual-related-posts' ),
+				'type'        => 'checkbox',
+				'options'     => false,
+				'field_class' => 'crp_admin_cascading',
+			),
+			'include_words'             => array(
+				'id'      => 'include_words',
+				'name'    => esc_html__( 'Include only posts that contain these words:', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'If entered, the related posts will include only posts that contain any of the specified words. Separate words with commas and no spaces. e.g. samsung,apple,nokia', 'contextual-related-posts' ),
+				'type'    => 'csv',
+				'options' => '',
+			),
+			'exclude_words'             => array(
+				'id'      => 'exclude_words',
+				'name'    => esc_html__( 'Exclude posts that contain these words:', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'If entered, the related posts will exclude posts that contain any of the specified words. Separate words with commas and no spaces. e.g. samsung,apple,nokia', 'contextual-related-posts' ),
+				'type'    => 'csv',
+				'options' => '',
 			),
 		);
 
@@ -786,7 +833,6 @@ class Settings {
 		 */
 		return apply_filters( self::$prefix . '_settings_list', $settings );
 	}
-
 
 	/**
 	 * Retrieve the array of Thumbnail settings
@@ -905,7 +951,6 @@ class Settings {
 		return apply_filters( self::$prefix . '_settings_thumbnail', $settings );
 	}
 
-
 	/**
 	 * Retrieve the array of Styles settings
 	 *
@@ -1016,6 +1061,109 @@ class Settings {
 		 * @param array $settings Feed settings array
 		 */
 		return apply_filters( self::$prefix . '_settings_feed', $settings );
+	}
+
+	/**
+	 * Retrieve the array of Performance settings
+	 *
+	 * @since 4.0.0
+	 *
+	 * @return array Performance settings array
+	 */
+	public static function settings_performance() {
+		$custom_tables_desc = sprintf(
+			/* translators: 1: Opening a tag, 2: Closing a tag */
+			esc_html__( 'Efficient Content Storage and Indexing (ECSI) creates a dedicated database table optimized for related content queries. This enhances performance, particularly on sites with a large number of posts or high traffic. To create the ECSI tables, visit the %1$sTools tab%2$s.', 'contextual-related-posts' ),
+			'<a href="' . esc_url( admin_url( 'tools.php?page=crp_tools_page' ) ) . '" target="_blank">',
+			'</a>'
+		);
+
+		if ( is_admin() ) {
+			$mysql_message = \WebberZone\Contextual_Related_Posts\Util\Helpers::get_database_compatibility_message();
+
+			if ( $mysql_message ) {
+				$custom_tables_desc .= '<br /><br /><span style="color: #9B0800;">' . $mysql_message . '</span>';
+			}
+		}
+
+		$settings = array(
+			'custom_tables_header' => array(
+				'id'   => 'custom_tables_header',
+				'name' => '<h3>' . esc_html__( 'Efficient Content Storage and Indexing (ECSI)', 'contextual-related-posts' ) . '</h3>',
+				'desc' => $custom_tables_desc,
+				'type' => 'header',
+			),
+			'use_custom_tables'    => array(
+				'id'      => 'use_custom_tables',
+				'name'    => esc_html__( 'Use Custom Tables', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Use dedicated custom tables for related posts queries. This can significantly improve performance on large sites with many posts.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => false,
+				'default' => false,
+				'pro'     => true,
+			),
+			'optimization_header'  => array(
+				'id'   => 'optimization_header',
+				'name' => '<h3>' . esc_html__( 'Optimization', 'contextual-related-posts' ) . '</h3>',
+				'desc' => esc_html__( 'Settings for optimizing performance', 'contextual-related-posts' ),
+				'type' => 'header',
+			),
+			'cache_posts'          => array(
+				'id'      => 'cache_posts',
+				'name'    => esc_html__( 'Cache posts only', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Enabling this will only cache the related posts but not the entire HTML output. This gives you more flexibility at marginally lower performance. Use this if you only have the related posts called with the same set of parameters.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => true,
+			),
+			'cache'                => array(
+				'id'      => 'cache',
+				'name'    => esc_html__( 'Cache HTML output', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'Enabling this will cache the entire HTML generated when the post is visited the first time. The cache is cleaned when you save this page. Highly recommended particularly on busy sites. Default is true.', 'contextual-related-posts' ),
+				'type'    => 'checkbox',
+				'options' => true,
+			),
+			'cache_time'           => array(
+				'id'      => 'cache_time',
+				'name'    => esc_html__( 'Cache Time', 'contextual-related-posts' ),
+				'desc'    => esc_html__( 'How long should the related posts be cached for. Default is 30 days.', 'contextual-related-posts' ),
+				'type'    => 'select',
+				'default' => MONTH_IN_SECONDS,
+				'options' => array(
+					0                    => esc_html__( 'No expiry', 'contextual-related-posts' ),
+					HOUR_IN_SECONDS      => esc_html__( '1 Hour', 'contextual-related-posts' ),
+					6 * HOUR_IN_SECONDS  => esc_html__( '6 Hours', 'contextual-related-posts' ),
+					12 * HOUR_IN_SECONDS => esc_html__( '12 Hours', 'contextual-related-posts' ),
+					DAY_IN_SECONDS       => esc_html__( '1 Day', 'contextual-related-posts' ),
+					3 * DAY_IN_SECONDS   => esc_html__( '3 Days', 'contextual-related-posts' ),
+					WEEK_IN_SECONDS      => esc_html__( '1 Week', 'contextual-related-posts' ),
+					2 * WEEK_IN_SECONDS  => esc_html__( '2 Weeks', 'contextual-related-posts' ),
+					MONTH_IN_SECONDS     => esc_html__( '30 Days', 'contextual-related-posts' ),
+					2 * MONTH_IN_SECONDS => esc_html__( '60 Days', 'contextual-related-posts' ),
+					3 * MONTH_IN_SECONDS => esc_html__( '90 Days', 'contextual-related-posts' ),
+					YEAR_IN_SECONDS      => esc_html__( '1 Year', 'contextual-related-posts' ),
+				),
+				'pro'     => true,
+			),
+			'max_execution_time'   => array(
+				'id'      => 'max_execution_time',
+				'name'    => esc_html__( 'Max Execution Time', 'top-10' ),
+				'desc'    => esc_html__( 'Maximum execution time for MySQL queries in milliseconds. Set to 0 to disable. Default is 3000 (3 seconds).', 'top-10' ),
+				'type'    => 'number',
+				'options' => 3000,
+				'min'     => 0,
+				'step'    => 100,
+				'pro'     => true,
+			),
+		);
+
+		/**
+		 * Filters the Performance settings array
+		 *
+		 * @since 4.0.0
+		 *
+		 * @param array $settings Performance settings array
+		 */
+		return apply_filters( self::$prefix . '_settings_performance', $settings );
 	}
 
 	/**
@@ -1202,7 +1350,6 @@ class Settings {
 		return apply_filters( self::$prefix . '_settings_help', $help_tabs );
 	}
 
-
 	/**
 	 * Add footer text on the plugin page.
 	 *
@@ -1229,10 +1376,10 @@ class Settings {
 	public function change_settings_on_save( $settings ) {
 
 		// Sanitize exclude_cat_slugs to save a new entry of exclude_categories.
-		Settings_Sanitize::sanitize_tax_slugs( $settings, 'exclude_cat_slugs', 'exclude_categories' );
+		Settings\Settings_Sanitize::sanitize_tax_slugs( $settings, 'exclude_cat_slugs', 'exclude_categories' );
 
 		// Sanitize exclude_on_cat_slugs to save a new entry of exclude_on_categories.
-		Settings_Sanitize::sanitize_tax_slugs( $settings, 'exclude_on_cat_slugs', 'exclude_on_categories' );
+		Settings\Settings_Sanitize::sanitize_tax_slugs( $settings, 'exclude_on_cat_slugs', 'exclude_on_categories' );
 
 		// Overwrite settings if rounded thumbnail style is selected.
 		if ( 'rounded_thumbs' === $settings['crp_styles'] || 'thumbs_grid' === $settings['crp_styles'] ) {
